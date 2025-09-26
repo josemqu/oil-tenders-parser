@@ -18,6 +18,10 @@ load_dotenv(os.path.join(PROJECT_DIR, ".env.local"))
 
 # Source URL (can be overridden via ORIGIN_URL)
 URL = os.getenv("ORIGIN_URL")
+if not URL or str(URL).strip().lower() in {"", "none"}:
+    raise RuntimeError(
+        "Missing required environment variable ORIGIN_URL. Set it to the JSON source endpoint (e.g. via .env.local locally or GitHub Actions secrets/variables)."
+    )
 
 
 def html_to_text(value: str) -> str:
