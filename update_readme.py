@@ -110,13 +110,13 @@ def build_status_md(conn: Connection, table_name: str) -> str:
         m = age_m % 60
         age_human = f"hace {h}h {m}m" if m else f"hace {h}h"
 
-    # last 5 recent rows
+    # last 5 recent rows (order by published_at desc, then created_at desc)
     with conn.cursor() as cur:
         cur.execute(
             f"""
             select id, company, product, published_at, vigente, created_at
             from public.{table_name}
-            order by created_at desc
+            order by published_at desc nulls last, created_at desc
             limit 5
             """
         )
