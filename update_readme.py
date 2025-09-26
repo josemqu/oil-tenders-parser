@@ -209,7 +209,8 @@ def build_status_md(conn: Connection, table_name: str) -> str:
     if max_count == 0:
         lines.append("(sin registros en los últimos 15 días)")
     else:
-        for i in range(15):
+        # Print most recent first
+        for i in range(14, -1, -1):
             day = start_day + timedelta(days=i)
             c = counts_by_day.get(day, 0)
             bar_len = int(round((c / max_count) * scale)) if max_count else 0
