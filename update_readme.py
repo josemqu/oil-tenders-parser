@@ -6,6 +6,7 @@ from typing import Optional
 import psycopg
 from psycopg import Connection
 from dotenv import load_dotenv
+from urllib.parse import quote
 
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
 # Load local env when running locally; GitHub Actions will use repo secrets/variables
@@ -61,11 +62,24 @@ def build_status_md(conn: Connection, table_name: str) -> str:
         cur.execute(f"select max(created_at) from public.{table_name}")
         max_created = cur.fetchone()[0]
 
-    last_updated_iso = (
-        max_created.astimezone(timezone.utc).isoformat()
-        if max_created is not None
-        else datetime.now(timezone.utc).isoformat()
-    )
+    now_utc = datetime.now(timezone.utc)
+    if max_created is not None and max_created.tzinfo is None:
+        # assume UTC if naive
+        max_created = max_created.replace(tzinfo=timezone.utc)
+    last_updated_dt = max_created or now_utc
+    last_updated_iso = last_updated_dt.astimezone(timezone.utc).isoformat()
+
+    # status color based on recency
+    age_minutes = (now_utc - last_updated_dt).total_seconds() / 60.0
+    if age_minutes <= 30:
+        status_color = "brightgreen"
+        status_text = "al_dia"
+    elif age_minutes <= 120:
+        status_color = "yellow"
+        status_text = "reciente"
+    else:
+        status_color = "red"
+        status_text = "desactualizado"
 
     # last 5 recent rows
     with conn.cursor() as cur:
@@ -79,24 +93,70 @@ def build_status_md(conn: Connection, table_name: str) -> str:
         )
         recent = cur.fetchall()
 
+    # daily evolution last 14 days
+    with conn.cursor() as cur:
+        cur.execute(
+            f"""
+            select cast(created_at at time zone 'utc' as date) as d, count(*)
+            from public.{table_name}
+            where created_at >= (now() at time zone 'utc') - interval '14 days'
+            group by d
+            order by d
+            """
+        )
+        evolution = cur.fetchall()  # list of (date, count)
+
+    # Build badges (Shields.io)
+    badge_updated = f"https://img.shields.io/badge/actualizado-{quote(last_updated_dt.strftime('%Y--%m--%d_%H:%M_UTC'))}-{status_color}?style=flat-square"
+    badge_total = f"https://img.shields.io/badge/total__registros-{total}-blue?style=flat-square"
+
     lines = []
-    lines.append("### Estado de ofertas (dinámico)")
+    lines.append("<!-- badges:start -->")
+    lines.append(
+        f"![Última actualización]({badge_updated}) "
+        f"![Total registros]({badge_total}) "
+        f"![Estado](https://img.shields.io/badge/estado-{status_text}-{status_color}?style=flat-square)"
+    )
+    lines.append("<!-- badges:end -->")
     lines.append("")
-    lines.append(f"- **Última actualización**: {last_updated_iso}")
-    lines.append(f"- **Total de registros**: {total}")
+    lines.append("#### Últimos 5 registros")
     lines.append("")
-    lines.append("- **Últimos 5 registros**:")
     if recent:
+        lines.append("| ID | Compañía | Producto | Publ. | Vigente | Creado |")
+        lines.append("|---:|---|---|---|---|---|")
         for r in recent:
             rid, company, product, published_at, vigente, created_at = r
+            prod = (product or "").replace("\n", " ")
+            if len(prod) > 60:
+                prod = prod[:60] + "…"
             pub = published_at.isoformat() if published_at else "-"
             vig = vigente if vigente else "-"
             created = created_at.astimezone(timezone.utc).isoformat() if created_at else "-"
-            lines.append(
-                f"  - id {rid} | {company} | {product[:60]}{'…' if product and len(product) > 60 else ''} | publ: {pub} | vigente: {vig} | created_at: {created}"
-            )
+            lines.append(f"| {rid} | {company} | {prod} | {pub} | {vig} | {created} |")
     else:
-        lines.append("  - (sin registros)")
+        lines.append("(sin registros)")
+
+    lines.append("")
+    lines.append("#### Evolución (últimos 14 días)")
+    lines.append("")
+
+    # Mermaid xychart-beta
+    if evolution:
+        x_vals = ", ".join([d.strftime('%m-%d') for d, _ in evolution])
+        y_vals = ", ".join([str(c) for _, c in evolution])
+        lines.append("```mermaid")
+        lines.append("xychart-beta")
+        lines.append("  title \"Registros por día (created_at)\"")
+        lines.append("  x-axis labels [" + x_vals + "]")
+        lines.append("  y-axis label \"Registros\"")
+        lines.append("  bar [" + y_vals + "]")
+        lines.append("```")
+    else:
+        lines.append("(sin datos suficientes para graficar)")
+
+    lines.append("")
+    lines.append(f"Actualizado (UTC): {last_updated_iso}")
+    lines.append(f"Total de registros: {total}")
 
     return "\n".join(lines) + "\n"
 
