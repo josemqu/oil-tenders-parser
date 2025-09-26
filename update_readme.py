@@ -85,12 +85,16 @@ def build_status_md(conn: Connection, table_name: str) -> str:
         # Mostrar fecha/hora natural en horario AR sin sufijos
         return dt.strftime("%d/%m/%Y %H:%M")
 
-    # status color based on recency
-    age_minutes = (now_utc - last_updated_dt).total_seconds() / 60.0
-    if age_minutes <= 30:
+    # status color based on recency (comparar en horario AR)
+    now_ar = now_utc.astimezone(tz_ar)
+    age_minutes = (now_ar - last_updated_ar).total_seconds() / 60.0
+    # Umbrales configurables: FRESH_MINUTES (por defecto 30), RECENT_MINUTES (por defecto 120)
+    fresh_minutes = int(os.getenv("FRESH_MINUTES", "30"))
+    recent_minutes = int(os.getenv("RECENT_MINUTES", "120"))
+    if age_minutes <= fresh_minutes:
         status_color = "brightgreen"
         status_text = "al_dia"
-    elif age_minutes <= 120:
+    elif age_minutes <= recent_minutes:
         status_color = "yellow"
         status_text = "reciente"
     else:
@@ -123,7 +127,9 @@ def build_status_md(conn: Connection, table_name: str) -> str:
         evolution = cur.fetchall()  # list of (date, count)
 
     # Build badges (Shields.io)
-    badge_updated = f"https://img.shields.io/badge/actualizado-{quote(last_updated_ar.strftime('%Y--%m--%d_%H-%M'))}-{status_color}?style=flat-square"
+    # Evitar dobles guiones y caracteres problemáticos en Shields
+    badge_time = last_updated_ar.strftime('%Y-%m-%d_%H-%M')
+    badge_updated = f"https://img.shields.io/badge/actualizado-{quote(badge_time)}-{status_color}?style=flat-square"
     badge_total = f"https://img.shields.io/badge/total__registros-{total}-blue?style=flat-square"
 
     lines = []
