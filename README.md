@@ -16,7 +16,7 @@ Este bloque se actualiza automáticamente con los últimos registros y la fecha 
 <!-- OFFERS_STATUS:START -->
 
 <!-- badges:start -->
-![Última actualización](https://img.shields.io/badge/actualizado-2025--09--26_15-49-red?style=flat-square) ![Total registros](https://img.shields.io/badge/total__registros-2418-blue?style=flat-square) ![Estado](https://img.shields.io/badge/estado-desactualizado-red?style=flat-square)
+![Última actualización](https://img.shields.io/badge/actualizado-2025-09-26_15-49-red?style=flat-square) ![Total registros](https://img.shields.io/badge/total__registros-2418-blue?style=flat-square) ![Estado](https://img.shields.io/badge/estado-desactualizado-red?style=flat-square)
 <!-- badges:end -->
 
 #### Últimos 5 registros
