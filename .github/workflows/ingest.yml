@@ -24,6 +24,7 @@ jobs:
 
       - name: Run ingestion
         env:
+          ORIGIN_URL: ${{ secrets.ORIGIN_URL }}
           SUPABASE_HOST: ${{ secrets.SUPABASE_HOST }}
           SUPABASE_PORT: ${{ secrets.SUPABASE_PORT }}
           SUPABASE_DB_NAME: ${{ secrets.SUPABASE_DB_NAME }}
