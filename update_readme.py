@@ -122,13 +122,13 @@ def build_status_md(conn: Connection, table_name: str) -> str:
         )
         recent = cur.fetchall()
 
-    # daily evolution last 15 days (group by AR local date)
+    # daily evolution last 15 days (group by AR local date, using published_at)
     with conn.cursor() as cur:
         cur.execute(
             f"""
-            select cast(created_at at time zone 'America/Argentina/Buenos_Aires' as date) as d, count(*)
+            select cast(published_at at time zone 'America/Argentina/Buenos_Aires' as date) as d, count(*)
             from public.{table_name}
-            where created_at >= (now() at time zone 'utc') - interval '15 days'
+            where published_at >= (now() at time zone 'utc') - interval '15 days'
             group by d
             order by d
             """
