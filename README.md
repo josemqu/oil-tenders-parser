@@ -1,16 +1,23 @@
-# Oil Export Offers Ingestion
+{{ ... }}
 
 This repository ingests public oil export offer listings from Argentina every 15 minutes and stores new entries in a Supabase Postgres database.
 
 Source URL:
 - https://www.se.gob.ar/comercio_exterior_liquidos/oferta_com_ext_expo_store.php
-
+  
 ## What it does
 - Fetches the JSON feed and parses each row (company, product, volume, dates, formula, location, notes, basin, PDF link, etc.).
 - Cleans HTML fields (replaces `<br>` and strips tags) and extracts the PDF URL from the `onclick` button.
 - Deduplicates by the numeric offer `id` and inserts only new entries into Postgres.
 - Runs on a GitHub Actions schedule every 15 minutes.
-
+  
+## Estado (dinámico)
+Este bloque se actualiza automáticamente con los últimos registros y la fecha de la última actualización.
+  
+<!-- OFFERS_STATUS:START -->
+  
+<!-- OFFERS_STATUS:END -->
+  
 ## Table schema
 The script auto-creates the table `public.oil_offers_export` if it does not exist.
 
@@ -18,7 +25,7 @@ Columns:
 - id integer primary key
 - published_at timestamptz
 - company text
-- product text
+{{ ... }}
 - volume text
 - delivery_start date
 - delivery_end date
