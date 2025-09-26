@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 from urllib.parse import quote
 try:
     from zoneinfo import ZoneInfo  # Python 3.9+
-except Exception:  # pragma: no cover
+except ImportError:  # pragma: no cover
     ZoneInfo = None  # type: ignore
 
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -77,10 +77,13 @@ def build_status_md(conn: Connection, table_name: str) -> str:
     else:
         tz_ar = timezone(timedelta(hours=-3))
 
-    last_updated_iso = last_updated_dt.astimezone(timezone.utc).isoformat()
+    # Considerar timestamps locales de Argentina cuando sean naive
+    if last_updated_dt.tzinfo is None:
+        last_updated_dt = last_updated_dt.replace(tzinfo=tz_ar)
     last_updated_ar = last_updated_dt.astimezone(tz_ar)
     def fmt_ar(dt: datetime) -> str:
-        return dt.strftime("%d/%m/%Y %H:%M (UTC-3)")
+        # Mostrar fecha/hora natural en horario AR sin sufijos
+        return dt.strftime("%d/%m/%Y %H:%M")
 
     # status color based on recency
     age_minutes = (now_utc - last_updated_dt).total_seconds() / 60.0
@@ -120,7 +123,7 @@ def build_status_md(conn: Connection, table_name: str) -> str:
         evolution = cur.fetchall()  # list of (date, count)
 
     # Build badges (Shields.io)
-    badge_updated = f"https://img.shields.io/badge/actualizado-{quote(last_updated_ar.strftime('%Y--%m--%d_%H:%M_UTC-3'))}-{status_color}?style=flat-square"
+    badge_updated = f"https://img.shields.io/badge/actualizado-{quote(last_updated_ar.strftime('%Y--%m--%d_%H-%M'))}-{status_color}?style=flat-square"
     badge_total = f"https://img.shields.io/badge/total__registros-{total}-blue?style=flat-square"
 
     lines = []
@@ -155,9 +158,22 @@ def build_status_md(conn: Connection, table_name: str) -> str:
             # allow more content without truncation, but avoid extremely long cells
             if len(prod) > 120:
                 prod = prod[:120] + "…"
-            pub = fmt_ar(published_at.astimezone(tz_ar)) if published_at else "-"
+            # published_at puede ser local AR almacenado como naive; ajustar
+            if published_at:
+                pub_dt = published_at
+                if pub_dt.tzinfo is None:
+                    pub_dt = pub_dt.replace(tzinfo=tz_ar)
+                pub = fmt_ar(pub_dt.astimezone(tz_ar))
+            else:
+                pub = "-"
             vig = vigente if vigente else "-"
-            creado = fmt_ar(created_at.astimezone(tz_ar)) if created_at else "-"
+            if created_at:
+                creado_dt = created_at
+                if creado_dt.tzinfo is None:
+                    creado_dt = creado_dt.replace(tzinfo=tz_ar)
+                creado = fmt_ar(creado_dt.astimezone(tz_ar))
+            else:
+                creado = "-"
             lines.append(
                 f"    <tr><td style=\"text-align:right\">{rid}</td><td>{company}</td><td>{prod}</td><td>{pub}</td><td>{vig}</td><td>{creado}</td></tr>"
             )
@@ -170,19 +186,15 @@ def build_status_md(conn: Connection, table_name: str) -> str:
     lines.append("#### Evolución (últimos 14 días)")
     lines.append("")
 
-    # Mermaid xychart-beta
+    # Reemplazo del gráfico Mermaid por una tabla Markdown para compatibilidad
     if evolution:
-        x_vals = ", ".join([d.strftime('%m-%d') for d, _ in evolution])
-        y_vals = ", ".join([str(c) for _, c in evolution])
-        lines.append("```mermaid")
-        lines.append("xychart-beta")
-        lines.append("  title \"Registros por día (created_at)\"")
-        lines.append("  x-axis labels [" + x_vals + "]")
-        lines.append("  y-axis label \"Registros\"")
-        lines.append("  bar [" + y_vals + "]")
-        lines.append("```")
+        lines.append("| Día | Registros |")
+        lines.append("|:---:|---:|")
+        for d, c in evolution:
+            dia = d.strftime('%d/%m')
+            lines.append(f"| {dia} | {c} |")
     else:
-        lines.append("(sin datos suficientes para graficar)")
+        lines.append("(sin datos suficientes para mostrar evolución)")
 
     lines.append("")
     lines.append(f"Actualizado: {fmt_ar(last_updated_ar)}")
