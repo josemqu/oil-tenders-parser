@@ -126,16 +126,13 @@ def build_status_md(conn: Connection, table_name: str) -> str:
         )
         evolution = cur.fetchall()  # list of (date, count)
 
-    # Build badges (Shields.io)
-    # Evitar dobles guiones y caracteres problemáticos en Shields
-    badge_time = last_updated_ar.strftime('%Y-%m-%d_%H-%M')
-    badge_updated = f"https://img.shields.io/badge/actualizado-{quote(badge_time)}-{status_color}?style=flat-square"
+    # Build badges (Shields.io) — NOTE: mostramos la fecha como texto para evitar roturas del badge
     badge_total = f"https://img.shields.io/badge/total__registros-{total}-blue?style=flat-square"
 
     lines = []
+    lines.append(f"Última actualización: {fmt_ar(last_updated_ar)}")
     lines.append("<!-- badges:start -->")
     lines.append(
-        f"![Última actualización]({badge_updated}) "
         f"![Total registros]({badge_total}) "
         f"![Estado](https://img.shields.io/badge/estado-{status_text}-{status_color}?style=flat-square)"
     )
@@ -164,20 +161,15 @@ def build_status_md(conn: Connection, table_name: str) -> str:
             # allow more content without truncation, but avoid extremely long cells
             if len(prod) > 120:
                 prod = prod[:120] + "…"
-            # published_at puede ser local AR almacenado como naive; ajustar
+            # Mostrar published_at tal como está almacenado (sin convertir tz)
             if published_at:
-                pub_dt = published_at
-                if pub_dt.tzinfo is None:
-                    pub_dt = pub_dt.replace(tzinfo=tz_ar)
-                pub = fmt_ar(pub_dt.astimezone(tz_ar))
+                pub = published_at.strftime("%d/%m/%Y %H:%M")
             else:
                 pub = "-"
             vig = vigente if vigente else "-"
+            # Mostrar created_at tal como está almacenado (sin convertir tz)
             if created_at:
-                creado_dt = created_at
-                if creado_dt.tzinfo is None:
-                    creado_dt = creado_dt.replace(tzinfo=tz_ar)
-                creado = fmt_ar(creado_dt.astimezone(tz_ar))
+                creado = created_at.strftime("%d/%m/%Y %H:%M")
             else:
                 creado = "-"
             lines.append(
