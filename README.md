@@ -2,24 +2,23 @@
 
 Este repositorio ingesta el listado público de ofertas de exportación de petróleo de Argentina cada 15 minutos y almacena los registros nuevos en una base de datos Postgres (Supabase).
 
-Fuente:
-
-- [Listado oficial de ofertas](https://www.se.gob.ar/comercio_exterior_liquidos/oferta_com_ext_expo_store.php)
-  
 ## Qué hace
 
 - Descarga el feed JSON y parsea cada fila (empresa, producto, volumen, fechas, fórmula de precio, ubicación, notas, cuenca, enlace al PDF, etc.).
 - Limpia campos HTML (reemplaza `<br>` y remueve etiquetas) y extrae la URL del PDF desde el botón `onclick`.
 - Deduplica por el `id` numérico de la oferta e inserta solo registros nuevos en Postgres.
 - Se ejecuta mediante GitHub Actions cada 15 minutos.
-  
+
 ## Estado (dinámico)
+
 Este bloque se actualiza automáticamente con los últimos registros y la fecha de la última actualización.
-  
+
 <!-- OFFERS_STATUS:START -->
 
 <!-- badges:start -->
+
 ![Última actualización](https://img.shields.io/badge/actualizado-2025--09--26_15-49-red?style=flat-square) ![Total registros](https://img.shields.io/badge/total__registros-2418-blue?style=flat-square) ![Estado](https://img.shields.io/badge/estado-desactualizado-red?style=flat-square)
+
 <!-- badges:end -->
 
 #### Últimos 5 registros
@@ -47,24 +46,25 @@ Este bloque se actualiza automáticamente con los últimos registros y la fecha 
 
 #### Evolución (últimos 14 días)
 
-| Día | Registros |
-|:---:|---:|
-| 26/09 | 2418 |
+|  Día  | Registros |
+| :---: | --------: |
+| 26/09 |      2418 |
 
 Actualizado: 26/09/2025 15:49
 Total de registros: 2418
 
 <!-- OFFERS_STATUS:END -->
-  
+
 ## Esquema de tabla
 
 El script crea automáticamente la tabla `public.oil_offers_export` si no existe.
 
 Columnas:
+
 - id integer primary key
 - published_at timestamptz
 - company text
-{{ ... }}
+  {{ ... }}
 - volume text
 - delivery_start date
 - delivery_end date
