@@ -101,6 +101,15 @@ def build_status_md(conn: Connection, table_name: str) -> str:
         status_color = "red"
         status_text = "desactualizado"
 
+    # Humanize age, e.g., "hace 12m" or "hace 2h 5m"
+    age_m = int(round(age_minutes)) if age_minutes >= 0 else 0
+    if age_m < 60:
+        age_human = f"hace {age_m}m"
+    else:
+        h = age_m // 60
+        m = age_m % 60
+        age_human = f"hace {h}h {m}m" if m else f"hace {h}h"
+
     # last 5 recent rows
     with conn.cursor() as cur:
         cur.execute(
@@ -132,13 +141,15 @@ def build_status_md(conn: Connection, table_name: str) -> str:
     lines = []
     lines.append(f"Última actualización: {fmt_ar(last_updated_ar)}")
     lines.append("<!-- badges:start -->")
+    # Recency badge shows humanized age; use label 'recencia'
+    recency_badge = f"https://img.shields.io/badge/recencia-{quote(age_human.replace(' ', '_'))}-{status_color}?style=flat-square"
     lines.append(
         f"![Total registros]({badge_total}) "
-        f"![Estado](https://img.shields.io/badge/estado-{status_text}-{status_color}?style=flat-square)"
+        f"![Recencia]({recency_badge})"
     )
     lines.append("<!-- badges:end -->")
     lines.append("")
-    lines.append("#### Últimos 5 registros")
+    lines.append("### Últimos 5 registros")
     lines.append("")
     if recent:
         # HTML table to control column widths
@@ -181,7 +192,7 @@ def build_status_md(conn: Connection, table_name: str) -> str:
         lines.append("(sin registros)")
 
     lines.append("")
-    lines.append("#### Evolución (últimos 14 días)")
+    lines.append("### Evolución (últimos 14 días)")
     lines.append("")
 
     # Reemplazo del gráfico Mermaid por una tabla Markdown para compatibilidad
@@ -194,9 +205,7 @@ def build_status_md(conn: Connection, table_name: str) -> str:
     else:
         lines.append("(sin datos suficientes para mostrar evolución)")
 
-    lines.append("")
-    lines.append(f"Actualizado: {fmt_ar(last_updated_ar)}")
-    lines.append(f"Total de registros: {total}")
+    # No agregar totales/actualización nuevamente para evitar duplicados visuales
 
     return "\n".join(lines) + "\n"
 
