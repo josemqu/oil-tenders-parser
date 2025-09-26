@@ -15,7 +15,23 @@ Source URL:
 Este bloque se actualiza automáticamente con los últimos registros y la fecha de la última actualización.
   
 <!-- OFFERS_STATUS:START -->
-  
+
+### Estado de ofertas (dinámico)
+
+- **Última actualización**: 2025-09-26T18:49:04.097025+00:00
+- **Total de registros**: 2418
+
+- **Últimos 5 registros**:
+  - id 2960 | Pan American Energy (Sucursal Argentina) LLC | GASOLINAS, EXCEPTO LAS DE AVIACIÓN
+Sin Plomo, Otras | publ: 2025-09-26T15:09:00+00:00 | vigente: No | created_at: 2025-09-26T18:49:04.097025+00:00
+  - id 2959 | REFINERÍA DEL NORTE S.A. | GASOIL | publ: 2025-09-26T15:09:00+00:00 | vigente: No | created_at: 2025-09-26T18:49:04.097025+00:00
+  - id 37 | AXION ENERGY ARGENTINA S.A. | GASOLINAS, EXCEPTO LAS DE AVIACIÓN
+Sin plomo, de RON inferio… | publ: 2017-10-13T12:10:00+00:00 | vigente: Si | created_at: 2025-09-26T18:36:42.999066+00:00
+  - id 39 | Pan American Energy (Sucursal Argentina) LLC | ACEITES CRUDOS DE PETRÓLEO
+Otros | publ: 2017-10-25T12:10:00+00:00 | vigente: Si | created_at: 2025-09-26T18:36:42.999066+00:00
+  - id 38 | SHELL C.A.P.S.A. | GASOLINAS, EXCEPTO LAS DE AVIACIÓN
+Sin plomo, de RON inferio… | publ: 2017-10-13T16:10:00+00:00 | vigente: Si | created_at: 2025-09-26T18:36:42.999066+00:00
+
 <!-- OFFERS_STATUS:END -->
   
 ## Table schema
