@@ -19,7 +19,7 @@ Este bloque se actualiza automáticamente con los últimos registros y la fecha 
 <!-- OFFERS_STATUS:START -->
 
 <!-- badges:start -->
-![Última actualización](https://img.shields.io/badge/actualizado-2025--09--26_15%3A49_UTC-3-red?style=flat-square) ![Total registros](https://img.shields.io/badge/total__registros-2418-blue?style=flat-square) ![Estado](https://img.shields.io/badge/estado-desactualizado-red?style=flat-square)
+![Última actualización](https://img.shields.io/badge/actualizado-2025--09--26_15-49-red?style=flat-square) ![Total registros](https://img.shields.io/badge/total__registros-2418-blue?style=flat-square) ![Estado](https://img.shields.io/badge/estado-desactualizado-red?style=flat-square)
 <!-- badges:end -->
 
 #### Últimos 5 registros
@@ -37,25 +37,21 @@ Este bloque se actualiza automáticamente con los últimos registros y la fecha 
     <tr><th style="text-align:right">ID</th><th>Compañía</th><th>Producto</th><th>Publ.</th><th>Vigente</th><th>Creado</th></tr>
   </thead>
   <tbody>
-    <tr><td style="text-align:right">2960</td><td>Pan American Energy (Sucursal Argentina) LLC</td><td>GASOLINAS, EXCEPTO LAS DE AVIACIÓN Sin Plomo, Otras</td><td>26/09/2025 12:09 (UTC-3)</td><td>No</td><td>26/09/2025 15:49 (UTC-3)</td></tr>
-    <tr><td style="text-align:right">2959</td><td>REFINERÍA DEL NORTE S.A.</td><td>GASOIL</td><td>26/09/2025 12:09 (UTC-3)</td><td>No</td><td>26/09/2025 15:49 (UTC-3)</td></tr>
-    <tr><td style="text-align:right">37</td><td>AXION ENERGY ARGENTINA S.A.</td><td>GASOLINAS, EXCEPTO LAS DE AVIACIÓN Sin plomo, de RON inferior o igual a 92</td><td>13/10/2017 09:10 (UTC-3)</td><td>Si</td><td>26/09/2025 15:36 (UTC-3)</td></tr>
-    <tr><td style="text-align:right">39</td><td>Pan American Energy (Sucursal Argentina) LLC</td><td>ACEITES CRUDOS DE PETRÓLEO Otros</td><td>25/10/2017 09:10 (UTC-3)</td><td>Si</td><td>26/09/2025 15:36 (UTC-3)</td></tr>
-    <tr><td style="text-align:right">38</td><td>SHELL C.A.P.S.A.</td><td>GASOLINAS, EXCEPTO LAS DE AVIACIÓN Sin plomo, de RON inferior o igual a 92</td><td>13/10/2017 13:10 (UTC-3)</td><td>Si</td><td>26/09/2025 15:36 (UTC-3)</td></tr>
+    <tr><td style="text-align:right">2960</td><td>Pan American Energy (Sucursal Argentina) LLC</td><td>GASOLINAS, EXCEPTO LAS DE AVIACIÓN Sin Plomo, Otras</td><td>26/09/2025 12:09</td><td>No</td><td>26/09/2025 15:49</td></tr>
+    <tr><td style="text-align:right">2959</td><td>REFINERÍA DEL NORTE S.A.</td><td>GASOIL</td><td>26/09/2025 12:09</td><td>No</td><td>26/09/2025 15:49</td></tr>
+    <tr><td style="text-align:right">37</td><td>AXION ENERGY ARGENTINA S.A.</td><td>GASOLINAS, EXCEPTO LAS DE AVIACIÓN Sin plomo, de RON inferior o igual a 92</td><td>13/10/2017 09:10</td><td>Si</td><td>26/09/2025 15:36</td></tr>
+    <tr><td style="text-align:right">39</td><td>Pan American Energy (Sucursal Argentina) LLC</td><td>ACEITES CRUDOS DE PETRÓLEO Otros</td><td>25/10/2017 09:10</td><td>Si</td><td>26/09/2025 15:36</td></tr>
+    <tr><td style="text-align:right">38</td><td>SHELL C.A.P.S.A.</td><td>GASOLINAS, EXCEPTO LAS DE AVIACIÓN Sin plomo, de RON inferior o igual a 92</td><td>13/10/2017 13:10</td><td>Si</td><td>26/09/2025 15:36</td></tr>
   </tbody>
 </table>
 
 #### Evolución (últimos 14 días)
 
-```mermaid
-xychart-beta
-  title "Registros por día (created_at)"
-  x-axis labels [09-26]
-  y-axis label "Registros"
-  bar [2418]
-```
+| Día | Registros |
+|:---:|---:|
+| 26/09 | 2418 |
 
-Actualizado: 26/09/2025 15:49 (UTC-3)
+Actualizado: 26/09/2025 15:49
 Total de registros: 2418
 
 <!-- OFFERS_STATUS:END -->
