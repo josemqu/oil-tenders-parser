@@ -122,13 +122,13 @@ def build_status_md(conn: Connection, table_name: str) -> str:
         )
         recent = cur.fetchall()
 
-    # daily evolution last 14 days (group by AR local date)
+    # daily evolution last 15 days (group by AR local date)
     with conn.cursor() as cur:
         cur.execute(
             f"""
             select cast(created_at at time zone 'America/Argentina/Buenos_Aires' as date) as d, count(*)
             from public.{table_name}
-            where created_at >= (now() at time zone 'utc') - interval '14 days'
+            where created_at >= (now() at time zone 'utc') - interval '15 days'
             group by d
             order by d
             """
@@ -192,18 +192,30 @@ def build_status_md(conn: Connection, table_name: str) -> str:
         lines.append("(sin registros)")
 
     lines.append("")
-    lines.append("### Evolución (últimos 14 días)")
+    lines.append("### Ofertas por día (últimos 15 días)")
     lines.append("")
 
-    # Reemplazo del gráfico Mermaid por una tabla Markdown para compatibilidad
-    if evolution:
-        lines.append("| Día | Registros |")
-        lines.append("|:---:|---:|")
-        for d, c in evolution:
-            dia = d.strftime('%d/%m')
-            lines.append(f"| {dia} | {c} |")
+    # ASCII bar chart (monospace) including zero days
+    # Build a continuous 15-day range in AR time
+    today_ar = now_ar.date()
+    start_day = today_ar - timedelta(days=14)
+    counts_by_day = {d: 0 for d in (start_day + timedelta(days=i) for i in range(15))}
+    for d, c in evolution:
+        counts_by_day[d] = c
+
+    max_count = max(counts_by_day.values()) if counts_by_day else 0
+    scale = 30  # max bar width in characters
+    lines.append("```")
+    if max_count == 0:
+        lines.append("(sin registros en los últimos 15 días)")
     else:
-        lines.append("(sin datos suficientes para mostrar evolución)")
+        for i in range(15):
+            day = start_day + timedelta(days=i)
+            c = counts_by_day.get(day, 0)
+            bar_len = int(round((c / max_count) * scale)) if max_count else 0
+            bar = "█" * bar_len if bar_len > 0 else ""
+            lines.append(f"{day.strftime('%d/%m')} | {c:5d} {bar}")
+    lines.append("```")
 
     # No agregar totales/actualización nuevamente para evitar duplicados visuales
 
