@@ -1,12 +1,16 @@
 import os
 import re
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from typing import Optional
 
 import psycopg
 from psycopg import Connection
 from dotenv import load_dotenv
 from urllib.parse import quote
+try:
+    from zoneinfo import ZoneInfo  # Python 3.9+
+except Exception:  # pragma: no cover
+    ZoneInfo = None  # type: ignore
 
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
 # Load local env when running locally; GitHub Actions will use repo secrets/variables
@@ -67,7 +71,16 @@ def build_status_md(conn: Connection, table_name: str) -> str:
         # assume UTC if naive
         max_created = max_created.replace(tzinfo=timezone.utc)
     last_updated_dt = max_created or now_utc
+    # Build AR timezone
+    if ZoneInfo is not None:
+        tz_ar = ZoneInfo("America/Argentina/Buenos_Aires")
+    else:
+        tz_ar = timezone(timedelta(hours=-3))
+
     last_updated_iso = last_updated_dt.astimezone(timezone.utc).isoformat()
+    last_updated_ar = last_updated_dt.astimezone(tz_ar)
+    def fmt_ar(dt: datetime) -> str:
+        return dt.strftime("%d/%m/%Y %H:%M (UTC-3)")
 
     # status color based on recency
     age_minutes = (now_utc - last_updated_dt).total_seconds() / 60.0
@@ -93,11 +106,11 @@ def build_status_md(conn: Connection, table_name: str) -> str:
         )
         recent = cur.fetchall()
 
-    # daily evolution last 14 days
+    # daily evolution last 14 days (group by AR local date)
     with conn.cursor() as cur:
         cur.execute(
             f"""
-            select cast(created_at at time zone 'utc' as date) as d, count(*)
+            select cast(created_at at time zone 'America/Argentina/Buenos_Aires' as date) as d, count(*)
             from public.{table_name}
             where created_at >= (now() at time zone 'utc') - interval '14 days'
             group by d
@@ -107,7 +120,7 @@ def build_status_md(conn: Connection, table_name: str) -> str:
         evolution = cur.fetchall()  # list of (date, count)
 
     # Build badges (Shields.io)
-    badge_updated = f"https://img.shields.io/badge/actualizado-{quote(last_updated_dt.strftime('%Y--%m--%d_%H:%M_UTC'))}-{status_color}?style=flat-square"
+    badge_updated = f"https://img.shields.io/badge/actualizado-{quote(last_updated_ar.strftime('%Y--%m--%d_%H:%M_UTC-3'))}-{status_color}?style=flat-square"
     badge_total = f"https://img.shields.io/badge/total__registros-{total}-blue?style=flat-square"
 
     lines = []
@@ -122,17 +135,34 @@ def build_status_md(conn: Connection, table_name: str) -> str:
     lines.append("#### Últimos 5 registros")
     lines.append("")
     if recent:
-        lines.append("| ID | Compañía | Producto | Publ. | Vigente | Creado |")
-        lines.append("|---:|---|---|---|---|---|")
+        # HTML table to control column widths
+        lines.append("<table>")
+        lines.append("  <colgroup>")
+        lines.append("    <col style=\"width:8%\">")
+        lines.append("    <col style=\"width:24%\">")
+        lines.append("    <col style=\"width:38%\">")
+        lines.append("    <col style=\"width:12%\">")
+        lines.append("    <col style=\"width:8%\">")
+        lines.append("    <col style=\"width:10%\">")
+        lines.append("  </colgroup>")
+        lines.append("  <thead>")
+        lines.append("    <tr><th style=\"text-align:right\">ID</th><th>Compañía</th><th>Producto</th><th>Publ.</th><th>Vigente</th><th>Creado</th></tr>")
+        lines.append("  </thead>")
+        lines.append("  <tbody>")
         for r in recent:
             rid, company, product, published_at, vigente, created_at = r
             prod = (product or "").replace("\n", " ")
-            if len(prod) > 60:
-                prod = prod[:60] + "…"
-            pub = published_at.isoformat() if published_at else "-"
+            # allow more content without truncation, but avoid extremely long cells
+            if len(prod) > 120:
+                prod = prod[:120] + "…"
+            pub = fmt_ar(published_at.astimezone(tz_ar)) if published_at else "-"
             vig = vigente if vigente else "-"
-            created = created_at.astimezone(timezone.utc).isoformat() if created_at else "-"
-            lines.append(f"| {rid} | {company} | {prod} | {pub} | {vig} | {created} |")
+            creado = fmt_ar(created_at.astimezone(tz_ar)) if created_at else "-"
+            lines.append(
+                f"    <tr><td style=\"text-align:right\">{rid}</td><td>{company}</td><td>{prod}</td><td>{pub}</td><td>{vig}</td><td>{creado}</td></tr>"
+            )
+        lines.append("  </tbody>")
+        lines.append("</table>")
     else:
         lines.append("(sin registros)")
 
@@ -155,7 +185,7 @@ def build_status_md(conn: Connection, table_name: str) -> str:
         lines.append("(sin datos suficientes para graficar)")
 
     lines.append("")
-    lines.append(f"Actualizado (UTC): {last_updated_iso}")
+    lines.append(f"Actualizado: {fmt_ar(last_updated_ar)}")
     lines.append(f"Total de registros: {total}")
 
     return "\n".join(lines) + "\n"
