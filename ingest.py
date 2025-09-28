@@ -187,9 +187,16 @@ def ensure_table(conn, table_name: str = "oil_offers_export"):
         created_at timestamptz not null default now()
     );
     """
-    with conn.cursor() as cur:
-        cur.execute(ddl)
-    conn.commit()
+    # Execute DDL in autocommit mode to avoid "read-only transaction" errors
+    # when connecting via poolers (e.g., PgBouncer transaction pooling on Supabase).
+    # We temporarily enable autocommit for the DDL and then restore the previous setting.
+    prev_autocommit = getattr(conn, "autocommit", False)
+    try:
+        conn.autocommit = True
+        with conn.cursor() as cur:
+            cur.execute(ddl)
+    finally:
+        conn.autocommit = prev_autocommit
 
 
 def upsert_rows(
