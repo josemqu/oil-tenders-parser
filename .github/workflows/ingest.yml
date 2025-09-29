@@ -2,7 +2,7 @@ name: Oil Offers Ingestion
 
 on:
   schedule:
-    - cron: "*/15 * * * *"
+    # - cron: "0 21 * * *"
   workflow_dispatch: {}
 
 jobs:
