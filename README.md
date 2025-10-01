@@ -16,7 +16,7 @@ Este bloque se actualiza automáticamente con los últimos registros, la fecha d
 
 Última actualización: 26/09/2025 15:49
 <!-- badges:start -->
-![Total registros](https://img.shields.io/badge/total__registros-2418-blue?style=flat-square) ![Recencia](https://img.shields.io/badge/recencia-hace_120h_17m-red?style=flat-square)
+![Total registros](https://img.shields.io/badge/total__registros-2418-blue?style=flat-square) ![Recencia](https://img.shields.io/badge/recencia-hace_120h_33m-red?style=flat-square)
 <!-- badges:end -->
 
 ### Últimos 5 registros
