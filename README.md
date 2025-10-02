@@ -16,7 +16,7 @@ Este bloque se actualiza automáticamente con los últimos registros, la fecha d
 
 Última actualización: 26/09/2025 15:49
 <!-- badges:start -->
-![Total registros](https://img.shields.io/badge/total__registros-2418-blue?style=flat-square) ![Recencia](https://img.shields.io/badge/recencia-hace_127h_56m-red?style=flat-square)
+![Total registros](https://img.shields.io/badge/total__registros-2418-blue?style=flat-square) ![Recencia](https://img.shields.io/badge/recencia-hace_128h_18m-red?style=flat-square)
 <!-- badges:end -->
 
 ### Últimos 5 registros
@@ -45,6 +45,7 @@ Este bloque se actualiza automáticamente con los últimos registros, la fecha d
 ### Ofertas por día (últimos 15 días)
 
 ```
+02/10 |     0 
 01/10 |     0 
 30/09 |     0 
 29/09 |     0 
@@ -59,7 +60,6 @@ Este bloque se actualiza automáticamente con los últimos registros, la fecha d
 20/09 |     1 ██████████
 19/09 |     0 
 18/09 |     1 ██████████
-17/09 |     0 
 ```
 
 <!-- OFFERS_STATUS:END -->
